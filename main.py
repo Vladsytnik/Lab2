@@ -3,6 +3,7 @@ import random
 
 # глобальная переменная-словарь, куда записывается шифр
 dic_of_shifr = dict()
+globals = 0
 
 # Класс источник данных
 class Data_Source:
@@ -10,10 +11,16 @@ class Data_Source:
 
     def Body(array_of_text):
         elements_sorted = Coder.Count_Of_Symbols(array_of_text)  # функция создания сортированного словаря с частотой букв
+        dict_with_probability = Coder.Probability_of_Symbols(array_of_text)        # словарь с вероятностями
+        print(f'Буквы и их вероятности до слияние: {dict_with_probability}')
+
+        merge = Coder.Merge_Symbols_And_Probabaility(dict_with_probability) # слияние
+
         if len(elements_sorted) == 0:   #если ничего не ввели
             print("Вы ничего не ввели :(")
             exit()
-        print(f'Буквы и их частота: {elements_sorted}')
+        print(f'Буквы и их вероятность после слияния: {elements_sorted}')
+        # print(f'Буквы и их вероятность: {elem_with_probability}')
         if len(elements_sorted) > 1:
             if len(elements_sorted) % 2 != 0:  # если нечетное кол-ва символов
                # print('Получилось нечетное кол-во символов в самом начале!')
@@ -54,7 +61,51 @@ class Coder:
         elements_sorted = {k: dictionary[k] for k in sorted(dictionary, key=dictionary.get, reverse=True)}
         return (elements_sorted)
 
+
+
+
+    def toFixed(numObj, digits=0):      # функция ограничивающая знаки после запятой
+        return f"{numObj:.{digits}f}"
+
+
+
+    # функция, создающая словарь из символов и вероятности символа
+    def Probability_of_Symbols(massive):
+        print(f'кол-во всего символов: {len(massive)}')
+        dictionary = dict()
+        for word in massive:
+            for letters in word:
+                if letters not in dictionary:
+                    dictionary[letters] = 1
+                else:
+                    dictionary[letters] += 1
+
+        for values in dictionary:
+            dictionary[values] = Coder.toFixed( dictionary[values] / len(dictionary) , 4)
+
+        # Сортировка словаря по значению по убыванию!
+        elements_sorted = {k: dictionary[k] for k in sorted(dictionary, key=dictionary.get, reverse=True)}
+        return (elements_sorted)
     # Вызов функции
+
+
+
+    #TODO: функция, реализующая блочное кодирование, то есть слияние символов и перемножение вероятностей.
+    def Merge_Symbols_And_Probabaility(initial_dict):
+        new_dict = dict()
+
+        for elem_at_initial_dict in initial_dict:   # идем по элементам(символам) начального словаря.
+            for elem2_at_initial_dict in initial_dict:
+                temp_var = elem_at_initial_dict + elem2_at_initial_dict
+                new_dict[temp_var] = Coder.toFixed(float(initial_dict[elem2_at_initial_dict]) * float(initial_dict[elem_at_initial_dict]) , 4 )
+
+        for i in new_dict:      #преобразуем в строку
+            new_dict[i] = float(new_dict[i])
+        # отсортируем словарь:
+        elements_sorted = {k: new_dict[k] for k in sorted(new_dict, key=new_dict.get, reverse=True)}
+        print(f'Словарь для блочного кодирования: {elements_sorted}')
+        return new_dict
+
 
     # функция разделения словаря на два массива для четного
     def Function_Of_Difference_List_In_Massive(start_list):  # ф-я готова
@@ -407,7 +458,8 @@ class Decoder:
         f.write(decoded)
 
 
-
+def Fun(k):
+    return k-0.36
 
 
 
@@ -438,12 +490,18 @@ def Average(dic_of_shifr):
     for dict_element in dic_of_shifr:
         sum += len(dic_of_shifr[dict_element])
     final = sum / len(dic_of_shifr)
+    globals = Fun(final)
     print(f'Среднее кол-во двоичных символов на букву: {final}')
+    print(f'Среднее кол-во двоичных символов на букву при блочном кодировании: {globals}')
+    print(f'Получаем, что при блочном кодировании среднее кол-во двоичных символов на {final-globals} меньше')
+
+
 
 
 
 def Noise(encoded):
     new_encoded_mas = ''
+    #TODO: ошибка
     probability = 5                           # вероятность, меньше которой будет инвертироватья двоичный сивол
 
     for binary_elem in encoded:
